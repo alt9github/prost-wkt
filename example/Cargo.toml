@@ -19,6 +19,7 @@ serde.workspace = true
 serde_derive.workspace = true
 serde_json.workspace = true
 chrono = { workspace = true, default-features = false, features = ["clock", "serde"] }
+typetag = "0.2"
 
 [build-dependencies]
 prost-build.workspace = true

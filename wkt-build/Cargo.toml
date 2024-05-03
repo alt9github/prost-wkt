@@ -16,3 +16,4 @@ prost-types.workspace = true
 prost-build.workspace = true
 quote = "1.0.43"
 heck = { version = ">=0.4, <=0.5" }
+typetag = "0.2"
