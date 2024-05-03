@@ -1,4 +1,4 @@
-use heck::ToUpperCamelCase;
+use heck::{ToUpperCamelCase};
 use quote::{format_ident, quote};
 use std::fs::{File, OpenOptions};
 use std::io::Write;
@@ -48,52 +48,48 @@ fn gen_trait_impl(rust_file: &mut File, package_name: &str, message_name: &str, 
     let type_name = format_ident!("{}", type_name);
 
     let tokens = quote! {
-        #[allow(dead_code)]
-        const _: () = {
-            use ::prost_wkt::typetag;
-            #[typetag::serde(name=#type_url)]
-            impl ::prost_wkt::MessageSerde for #type_name {
-                fn package_name(&self) -> &'static str {
-                    #package_name
-                }
-                fn message_name(&self) -> &'static str {
-                    #message_name
-                }
-                fn type_url(&self) -> &'static str {
-                    #type_url
-                }
-                fn new_instance(&self, data: Vec<u8>) -> ::std::result::Result<Box<dyn ::prost_wkt::MessageSerde>, ::prost::DecodeError> {
-                    let mut target = Self::default();
-                    ::prost::Message::merge(&mut target, data.as_slice())?;
-                    let erased: ::std::boxed::Box<dyn ::prost_wkt::MessageSerde> = ::std::boxed::Box::new(target);
-                    Ok(erased)
-                }
-                fn try_encoded(&self) -> ::std::result::Result<::std::vec::Vec<u8>, ::prost::EncodeError> {
-                    let mut buf = ::std::vec::Vec::with_capacity(::prost::Message::encoded_len(self));
-                    ::prost::Message::encode(self, &mut buf)?;
-                    Ok(buf)
+        #[typetag::serde(name=#type_url)]
+        impl ::prost_wkt::MessageSerde for #type_name {
+            fn package_name(&self) -> &'static str {
+                #package_name
+            }
+            fn message_name(&self) -> &'static str {
+                #message_name
+            }
+            fn type_url(&self) -> &'static str {
+                #type_url
+            }
+            fn new_instance(&self, data: Vec<u8>) -> ::std::result::Result<Box<dyn ::prost_wkt::MessageSerde>, ::prost::DecodeError> {
+                let mut target = Self::default();
+                ::prost::Message::merge(&mut target, data.as_slice())?;
+                let erased: ::std::boxed::Box<dyn ::prost_wkt::MessageSerde> = ::std::boxed::Box::new(target);
+                Ok(erased)
+            }
+            fn try_encoded(&self) -> ::std::result::Result<::std::vec::Vec<u8>, ::prost::EncodeError> {
+                let mut buf = ::std::vec::Vec::with_capacity(::prost::Message::encoded_len(self));
+                ::prost::Message::encode(self, &mut buf)?;
+                Ok(buf)
+            }
+        }
+
+        ::prost_wkt::inventory::submit!{
+            ::prost_wkt::MessageSerdeDecoderEntry {
+                type_url: #type_url,
+                decoder: |buf: &[u8]| {
+                    let msg: #type_name = ::prost::Message::decode(buf)?;
+                    Ok(::std::boxed::Box::new(msg))
                 }
             }
+        }
 
-            ::prost_wkt::inventory::submit!{
-                ::prost_wkt::MessageSerdeDecoderEntry {
-                    type_url: #type_url,
-                    decoder: |buf: &[u8]| {
-                        let msg: #type_name = ::prost::Message::decode(buf)?;
-                        Ok(::std::boxed::Box::new(msg))
-                    }
-                }
+        impl ::prost::Name for #type_name {
+            const PACKAGE: &'static str = #package_name;
+            const NAME: &'static str = #message_name;
+
+            fn type_url() -> String {
+                #type_url.to_string()
             }
-
-            impl ::prost::Name for #type_name {
-                const PACKAGE: &'static str = #package_name;
-                const NAME: &'static str = #message_name;
-
-                fn type_url() -> String {
-                    #type_url.to_string()
-                }
-            }
-        };
+        }
     };
 
     writeln!(rust_file).unwrap();
