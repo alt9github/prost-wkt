@@ -50,11 +50,11 @@ fn gen_trait_impl(rust_file: &mut File, package_name: &str, message_name: &str, 
     let tokens = quote! {
         #[typetag::serde(name=#type_url)]
         impl ::prost_wkt::MessageSerde for #type_name {
-            fn package_name(&self) -> &'static str {
-                #package_name
-            }
             fn message_name(&self) -> &'static str {
                 #message_name
+            }
+            fn package_name(&self) -> &'static str {
+                #package_name
             }
             fn type_url(&self) -> &'static str {
                 #type_url
